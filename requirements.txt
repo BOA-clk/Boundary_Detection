@@ -1,7 +1,7 @@
-torch>=2.0.0
-numpy>=1.22.0
-scipy>=1.8.0
-
-# Optional for GPU acceleration:
-# mamba-ssm>=1.2.0
-# causal-conv1d>=1.2.0
+# Current install requirements, NOT a recovered historical lockfile.
+# Install a CUDA-compatible PyTorch build first for real paper training.
+torch>=2.0
+numpy>=1.22
+scipy>=1.8
+# Required separately for either offline paper runner:
+# pip install mamba-ssm causal-conv1d

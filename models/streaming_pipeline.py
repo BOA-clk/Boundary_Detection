@@ -151,7 +151,9 @@ class StreamingDetector:
         std_floor: float = 0.5,
         temporal_offset_sec: float = 0.0,
         device: Optional[torch.device] = None,
+        retain_boundaries: bool = False,
     ) -> None:
+        self.retain_boundaries = retain_boundaries
         self.model = model.eval()
         self.feature_hz = float(feature_hz)
         self.peak_threshold = float(peak_threshold)
@@ -173,6 +175,7 @@ class StreamingDetector:
         self.score_history: List[float] = []
         self.last_detected_step = -self.min_gap_steps
         self.detected_boundaries: List[float] = []
+        self.total_detected = 0
 
     def get_memory_bytes(self) -> int:
         """Calculates total persistent state memory across all 32 groups."""
@@ -206,6 +209,7 @@ class StreamingDetector:
 
         # 3. Causal Local Peak Confirmation with 1-sample decision look-ahead
         self.score_history.append(score_t)
+        self.score_history = self.score_history[-3:]
         t = self.step_idx
         self.step_idx += 1
 
@@ -237,7 +241,9 @@ class StreamingDetector:
 
                 timestamp = (candidate_step + shift) / self.feature_hz - self.temporal_offset_sec
                 timestamp = max(0.0, timestamp)
-                self.detected_boundaries.append(timestamp)
+                if self.retain_boundaries:
+                    self.detected_boundaries.append(timestamp)
+                self.total_detected += 1
                 confirmed_time = timestamp
 
         return {
@@ -247,5 +253,5 @@ class StreamingDetector:
             "normalized_score": score_t,
             "is_confirmed_boundary": is_confirmed,
             "confirmed_boundary_sec": confirmed_time,
-            "total_detected": len(self.detected_boundaries),
+            "total_detected": self.total_detected,
         }

@@ -19,7 +19,7 @@ from models.streaming_pipeline import StreamingBoundaryModel, StreamingDetector
 def run_streaming_demo():
     print("=====================================================================")
     print("  Stateful Feature-Streaming Action Boundary Detection Demo")
-    print("  IEEE Signal Processing Letters (2026)")
+    print("  Synthetic, untrained development demo; not a paper benchmark")
     print("=====================================================================")
 
     # 1. Initialize model and detector
@@ -36,11 +36,12 @@ def run_streaming_demo():
         peak_threshold=0.6,
         min_gap_sec=1.0,
         device=device,
+        retain_boundaries=True,
     )
 
     mem_bytes = detector.get_memory_bytes()
     print(f"Model Width: 64 channels x 32 groups = 2048 input dimensions")
-    print(f"Persistent Working Memory: {mem_bytes:,} bytes ({mem_bytes / 1024:.1f} KiB)")
+    print(f"Persistent Conv/SSM State: {mem_bytes:,} bytes ({mem_bytes / 1024:.1f} KiB)")
     print(f"Streaming Rate: {feature_hz} Hz (1 step every {1000.0 / feature_hz:.1f} ms)")
     print("-" * 69)
 
@@ -99,7 +100,7 @@ def run_streaming_demo():
     print(f"Step latency: median={np.percentile(latencies_ms, 50):.2f} ms, "
           f"p95={np.percentile(latencies_ms, 95):.2f} ms, "
           f"max={np.max(latencies_ms):.2f} ms")
-    print(f"Memory invariant: strictly bounded at {detector.get_memory_bytes() / 1024:.1f} KiB")
+    print(f"Conv/SSM state (excludes retained output list): {detector.get_memory_bytes() / 1024:.1f} KiB")
     print("=" * 69)
 
 

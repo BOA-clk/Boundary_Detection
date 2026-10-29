@@ -24,7 +24,11 @@ except Exception:
 
 
 class FallbackScan(nn.Module):
-    """Pure-PyTorch SSM Fallback when CUDA mamba_ssm kernel is unavailable.
+    """Development-only pure-PyTorch SSM fallback, not the paper backend.
+
+    Uses dt_rank=1; standard Mamba defaults can use another projection rank.
+    Matching recurrence equations do NOT imply identical parameterization,
+    initialization, weights, numerical outputs or trained-model equivalence.
 
     Implements causal 1D depthwise convolution, selective gating, and linear
     state recurrence, providing both full-sequence forward and single-step
@@ -43,6 +47,7 @@ class FallbackScan(nn.Module):
         self.d_state = d_state
         self.d_conv = d_conv
         self.d_inner = int(expand * d_model)
+        self.dt_rank = 1
 
         self.in_proj = nn.Linear(d_model, 2 * self.d_inner, bias=False)
         self.conv1d = nn.Conv1d(
@@ -160,6 +165,8 @@ def create_mamba_block(
     if MAMBA_AVAILABLE and torch.cuda.is_available():
         block = Mamba(d_model=d_model, d_state=d_state, d_conv=d_conv, expand=expand)
     else:
+        warnings.warn('Development FallbackScan (dt_rank=1); not equivalent to standard Mamba '
+                      'and not used by either offline paper runner.', RuntimeWarning, stacklevel=2)
         block = FallbackScan(d_model=d_model, d_state=d_state, d_conv=d_conv, expand=expand)
     # Freeze D = 0 (no skip / appearance bypass)
     with torch.no_grad():
