@@ -35,7 +35,7 @@ Video-macro boundary F1, mean ± population SD across official folds × seeds 0/
 | BaFormer | 1.63M | 0.313 ± 0.029 | 0.606 ± 0.024 | 0.524 ± 0.049 |
 | DiffAct | 1.21M | 0.182 ± 0.013 | 0.285 ± 0.037 | 0.312 ± 0.050 |
 | ASRF | 1.30M | 0.374 ± 0.042 | 0.601 ± 0.036 | **0.594 ± 0.040** |
-| MAMBOA | 0.70M | **0.470 ± 0.021** | **0.627 ± 0.023** | 0.577 ± 0.047 |
+| Proposed adapter | 0.70M | **0.470 ± 0.021** | **0.627 ± 0.023** | 0.577 ± 0.047 |
 
 ASFormer was not evaluated on Breakfast within the reproduction budget.
 Numbers are the revised manuscript's reported experiments, not results generated
@@ -52,8 +52,8 @@ presented here as independent-replication significance evidence.
   seed equals training seed. Test videos never enter tuning or checkpoint selection.
 - Model-specific architectures, losses and native decoders are retained.
 - Checkpoint: validation primary F1 at the first native decoder-grid candidate;
-  MAMBOA uses lambda=0. After checkpoint selection, tune decoder on validation;
-  larger parameter wins ties. MAMBOA lambda grid is 0,0.2,...,4; its fixed
+  Our adapter uses lambda=0. After checkpoint selection, tune decoder on validation;
+  larger parameter wins ties. The adapter's lambda grid is 0,0.2,...,4; its fixed
   minimum gaps are 2/0.8/4 seconds (30/12/60 steps) for Breakfast/GTEA/50Salads.
 - Calibration: median of nearest-prediction minus reference residual for every
   validation reference in videos with predictions, subtracted from test predictions.
@@ -65,7 +65,7 @@ presented here as independent-replication significance evidence.
   to maximize cardinality. Empty predictions/GT yield zero F1 in this scorer.
 - Tolerances: (0.5,1,2) s for Breakfast/50Salads; (0.2,0.4,0.8) s for GTEA.
   Average F1 across videos per run, then across runs; SD uses **ddof=0**.
-- MAMBOA main-table training is **FP32**, without autocast.
+- The proposed adapter's main-table training is **FP32**, without autocast.
 
 The authoritative runner is `experiments/offline_main.py`. Its optional
 `native_full_diagnostic` and `hungarian_same_predictions` are audits, not the

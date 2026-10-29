@@ -44,7 +44,9 @@ def main():
                 trainer=lambda:runner.m5_train_fold(spec,config,fold,ids,videos,out,device,'legacy_greedy')
             else:
                 root=out/args.variant; run=root/'full'/spec.name/f'seed{seed}_fold{fold}'
-                trainer=lambda:runner.mba_trainer(args.variant)(spec,config,fold,'full',ids,videos,root,device)
+                trainer=lambda:runner.mba_trainer(args.variant)(
+                    spec=spec,config=config,mode='full',fold=fold,ids=ids,
+                    videos=videos,output_dir=root,device=device)
             run.mkdir(parents=True,exist_ok=True)
             from contextlib import redirect_stdout,redirect_stderr
             import sys,traceback
@@ -60,7 +62,7 @@ def main():
     target=out/('full' if args.protocol=='main' else args.variant)/spec.name
     runner.mb_write_json(target/'selected_run_results.json',rows)
     if args.seed is None and args.fold is None:
-        summary=runner.m5_summary(rows,spec) if args.protocol=='main' else runner.mb_summary(rows,spec)
+        summary=runner.m5_summary(rows,spec) if args.protocol=='main' else runner.mb_final_summary(rows,spec)
         runner.mb_write_json(target/'summary.json',summary)
 
 if __name__=='__main__': main()
